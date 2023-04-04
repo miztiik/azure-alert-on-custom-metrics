@@ -55,8 +55,8 @@ This repository holds the bicep code to deploy the necessary infrastructure for 
    - Get the application code
 
      ```bash
-     https://github.com/miztiik/send-vm-logs-to-azure-monitor
-     cd send-vm-logs-to-azure-monitor
+     https://github.com/miztiik/azure-alert-on-custom-metrics
+     cd azure-alert-on-custom-metrics
      ```
 
 1. ## 🚀 Prepare the environment
@@ -94,9 +94,24 @@ This repository holds the bicep code to deploy the necessary infrastructure for 
    - **Stack: Main Bicep**
      The params required for the modules are in `params.json`. Do modify them to suit your need.(_Especially the `adminPassword.secureString` for the VM. You are strongly encouraged to Just-In-Time access or use SSH key instead of password based authentication_). The helper deployment script `deploy.sh` will deploy the `main.bicep` file. This will inturn call the modules for Resource Group(RG), VNet & Virtual Machine, Log analytics workspace, Custom table, Data collection endpoint, Data collection rule(DCR) and finally attach the DCR to the VM.
 
-     ```bash
-     sh deploy.sh
-     ```
+     **Alert Module**
+      We will create a KQL query to identify order events that match the given criteria - 
+      
+      ```kql
+      lumberyardTable001_CL | where discount > 90 and qty >1 and priority_shipping==true
+      ```
+
+      We can also refine it to aggregate only the events that had been received in the last `5` minutes like this,
+      ```kql
+      lumberyardTable001_CL
+      | where discount > 90 and qty > 1 and priority_shipping == true
+      | where Timestamp > ago(5m)
+      ```
+      But since have the option of choosing an evaluation frequency within the alert configuration, we will us that. Remember `evaluationFrequency` is smaller than the `aggregation` granularity, this will result in sliding window evaluation. The code is configured for `evaluationFrequency` of `1`minute and  aggregation `windowSize` of `5`minutes, resulting in creating a sliding window. This may also mean we can trigger the alarm multiple times for the event. It is a conscious choice, to balance signal-to-noise towards more noise(aka false-positives) when we are trying to catch suspicious activity.
+
+      ```bash
+      sh deploy.sh
+      ```
 
      This stack will create almost all of the resoureces. The RG is created as a deployment at the subscription level. The other resources are deployments at resource group level. 
 
@@ -165,7 +180,7 @@ This repository holds the bicep code to deploy the necessary infrastructure for 
 
       Login to Azure Log Anaytics portal. You should be able to find it under `/Miztiik_Enterprises_Custom_Logs_To_Monitor_xxx/providers/Microsoft.OperationalInsights/workspaces/lumberyard-payGTier-xxx",`. Navigate to logs, select the custom table(`lumberyardTablexxx_CL`) & `Run`
 
-      ![Miztiik Automaton: Alert on Custom Metrics](images/miztiik_automation_azure-alert-on-custom-metrics_003.png)
+      ![Miztiik Automaton: Alert on Custom Metrics](images/miztiik_automation_azure_alert_on_custom_metrics_architecture_002.png)
   
 
   1. **Troubleshooting Azure Monitor Agent**
@@ -186,7 +201,10 @@ This repository holds the bicep code to deploy the necessary infrastructure for 
       
 1. ## 📒 Conclusion
 
-    Here we have demonstrated how to configure a VM to send application logs to Azure monitor. You can extend the solution to setup alerts on these logs or secure the data collection endpoing to use a private link etc.,
+    Here we have demonstrated how to configure alerts based on custom logs. You can extend the solution to setup alerts actions groups & receive email notifications. An example of email notification is showin below,
+
+    ![Miztiik Automaton: Alert on Custom Metrics](images/miztiik_automation_azure_alert_on_custom_metrics_architecture_003.png)
+  
 
 1. ## 🧹 CleanUp
 
