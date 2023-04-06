@@ -9,7 +9,7 @@ set -o pipefail
 #############     SET GLOBALS     ################
 ##################################################
 
-REPO_NAME="send-vm-logs-to-azure-monitor"
+REPO_NAME="azure-alert-on-custom-metrics"
 
 GIT_REPO_URL="https://github.com/miztiik/$REPO_NAME.git"
 

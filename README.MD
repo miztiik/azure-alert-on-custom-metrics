@@ -1,4 +1,4 @@
-# Monitor application using custom logs
+# Alert based on Custom Metrics
 
 The developer at Mystique Unicorn are looking for a way to alert them based on the logs their app is generating. Their app creates an log entry that has the following fields.
 
@@ -40,7 +40,7 @@ This repository holds the bicep code to deploy the necessary infrastructure for 
 - Azure Monitort Alert Rule using KQL
 
 
-![Miztiik Automaton: Alert on Custom Metrics](images/miztiik_automation_azure_alert_on_custom_metrics_architecture_001.png)
+![Miztiik Automaton: Alert on Custom Metrics](images/miztiik_automation_azure_alert_on_custom_metrics_architecture_0011.png)
 
 1. ## 🧰 Prerequisites
 
